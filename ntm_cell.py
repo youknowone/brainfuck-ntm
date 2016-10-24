@@ -15,7 +15,7 @@ class NTMCell(object):
     def __init__(self, input_dim, output_dim,
                  mem_size=128, mem_dim=20, controller_dim=100,
                  controller_layer_size=1, shift_range=1,
-                 write_head_size=1, read_head_size=1):
+                 write_head_size=1, read_head_size=1, reuse=None):
         """Initialize the parameters for an NTM cell.
         Args:
             input_dim: int, The number of units in the LSTM cell
@@ -35,6 +35,7 @@ class NTMCell(object):
         self.shift_range = shift_range
         self.write_head_size = write_head_size
         self.read_head_size = read_head_size
+        self.reuse = reuse
 
         self.depth = 0
         self.states = []
@@ -277,14 +278,14 @@ class NTMCell(object):
 
             # memory
             M_init_linear = tf.tanh(Linear(dummy, self.mem_size * self.mem_dim,
-                                    name='M_init_linear'))
+                                    name='M_init_linear', reuse=self.reuse))
             M_init = tf.reshape(M_init_linear, [self.mem_size, self.mem_dim])
 
             # read weights
             read_w_list_init = []
             read_list_init = []
             for idx in xrange(self.read_head_size):
-                read_w_idx = Linear(dummy, self.mem_size, is_range=True, 
+                read_w_idx = Linear(dummy, self.mem_size, is_range=True,
                                     squeeze=True, name='read_w_%d' % idx)
                 read_w_list_init.append(softmax(read_w_idx))
 
@@ -300,8 +301,8 @@ class NTMCell(object):
                 write_w_list_init.append(softmax(write_w_idx))
 
             # controller state
-            output_init_list = []                     
-            hidden_init_list = []                     
+            output_init_list = []
+            hidden_init_list = []
             for idx in xrange(self.controller_layer_size):
                 output_init_idx = Linear(dummy, self.controller_dim,
                                          squeeze=True, name='output_init_%s' % idx)

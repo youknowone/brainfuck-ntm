@@ -14,13 +14,14 @@ import os
 from ops import binary_cross_entropy_with_logits
 from utils import progress
 
+
 class NTM(object):
     def __init__(self, cell, sess,
                  min_length, max_length,
                  test_max_length=120,
-                 min_grad=-10, max_grad=+10, 
+                 min_grad=-10, max_grad=+10,
                  lr=1e-4, momentum=0.9, decay=0.95,
-                 scope="NTM", forward_only=False):
+                 scope="NTM", forward_only=False, is_copy=True):
         """Create a neural turing machine specified by NTMCell "cell".
 
         Args:
@@ -79,7 +80,7 @@ class NTM(object):
         self.opt = tf.train.RMSPropOptimizer(self.lr,
                                              decay=self.decay,
                                              momentum=self.momentum)
-        self.build_model(forward_only)
+        self.build_model(forward_only, is_copy)
 
     def build_model(self, forward_only, is_copy=True):
         print(" [*] Building a NTM model")
@@ -89,6 +90,8 @@ class NTM(object):
             if is_copy:
                 _, prev_state = self.cell(self.start_symbol, state=None)
                 self.save_state(prev_state, 0, self.max_length)
+            else:
+                prev_state = None
 
             zeros = np.zeros(self.cell.input_dim, dtype=np.float32)
 
@@ -112,6 +115,8 @@ class NTM(object):
                 if is_copy:
                     _, state = self.cell(self.end_symbol, prev_state)
                     self.save_state(state, seq_length)
+                else:
+                    state = prev_state
 
                 self.prev_states[seq_length] = state
 
@@ -137,7 +142,7 @@ class NTM(object):
                                         softmax_loss_function=\
                                             binary_cross_entropy_with_logits)
 
-                    self.losses[seq_length] = loss 
+                    self.losses[seq_length] = loss
 
                     if not self.params:
                         self.params = tf.trainable_variables()
@@ -192,7 +197,7 @@ class NTM(object):
                                 softmax_loss_function=\
                                     binary_cross_entropy_with_logits)
 
-            self.losses[seq_length] = loss 
+            self.losses[seq_length] = loss
         return self.losses[seq_length]
 
     def get_output_states(self, seq_length):

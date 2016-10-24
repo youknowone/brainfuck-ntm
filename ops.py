@@ -1,5 +1,5 @@
 import math
-import numpy as np 
+import numpy as np
 import tensorflow as tf
 
 from tensorflow.python.ops import array_ops
@@ -9,6 +9,7 @@ from tensorflow.python.ops import math_ops
 from tensorflow.python.ops import variable_scope as vs
 
 from utils import *
+
 
 def linear(args, output_size, bias, bias_start=0.0, scope=None):
     """Linear map: sum_i(args[i] * W[i]), where W[i] is a variable.
@@ -66,6 +67,7 @@ def linear(args, output_size, bias, bias_start=0.0, scope=None):
     else:
         return res + bias_term
 
+
 def Linear(input_, output_size, stddev=0.5,
            is_range=False, squeeze=False,
            name=None, reuse=None):
@@ -108,7 +110,7 @@ def Linear(input_, output_size, stddev=0.5,
             b = tf.get_variable(b_name, [output_size], tf.float32,
                                 identity_initializer(tf.cast(range_, tf.float32)))
         else:
-            b = tf.get_variable(b_name, [output_size], tf.float32, 
+            b = tf.get_variable(b_name, [output_size], tf.float32,
                                 tf.random_normal_initializer(stddev=stddev))
 
         if squeeze:
@@ -120,6 +122,7 @@ def Linear(input_, output_size, stddev=0.5,
             return tf.reshape(output, [-1])
         else:
             return output
+
 
 def smooth_cosine_similarity(m, v):
     """Computes smooth cosine similarity.

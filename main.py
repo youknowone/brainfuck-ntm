@@ -4,7 +4,6 @@ import importlib
 import tensorflow as tf
 from ntm_cell import NTMCell
 from ntm import NTM
-
 from utils import pp
 
 flags = tf.app.flags
@@ -46,6 +45,9 @@ def main(_):
             print("task '%s' does not have implementation" % FLAGS.task)
             raise
 
+        if hasattr(task, 'preset_flags'):
+            task.preset_flags(FLAGS)
+
         if FLAGS.is_train:
             cell, ntm = create_ntm(FLAGS, sess)
             task.train(ntm, FLAGS, sess)
@@ -60,6 +62,18 @@ def main(_):
             task.run(ntm, FLAGS.test_max_length * 2 / 3, sess)
             print
             task.run(ntm, FLAGS.test_max_length * 3 / 3, sess)
+        elif FLAGS.task.startswith('brainfuck'):
+            from tasks.brainfuck_common import context_products
+
+            correct = 0
+            count = 0
+            for idx in range(len(context_products)):
+                seq_in, seq_out, outputs, rounded_outputs, read_ws, write_ws, loss = task.run(ntm, FLAGS.test_max_length, sess, idx=idx, print_=True)
+                count += 1
+                # if (seq_out[0] == rounded_outputs[0]).sum() == FLAGS.output_dim:
+                if task.seq_to_inst(seq_out) == task.seq_to_inst(rounded_outputs):
+                    correct += 1
+            print('correct: %d / count: %d' % (correct, count))
         else:
             task.run(ntm, FLAGS.test_max_length, sess)
 

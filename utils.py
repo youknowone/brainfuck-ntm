@@ -11,8 +11,9 @@ try:
 except NameError:
     xrange = range
 
+
 def progress(progress):
-    barLength = 20 # Modify this to change the length of the progress bar
+    barLength = 20  # Modify this to change the length of the progress bar
     status = ""
     if isinstance(progress, int):
         progress = float(progress)
@@ -25,10 +26,11 @@ def progress(progress):
     if progress >= 1:
         progress = 1
         status = "Finished.\r\n"
-    block = int(round(barLength*progress))
-    text = "\rPercent: [%s] %.2f%% %s" % ("#"*block + " "*(barLength-block), progress*100, status)
+    block = int(round(barLength * progress))
+    text = "\rPercent: [%s] %.2f%% %s" % ("#" * block + " " * (barLength - block), progress * 100, status)
     sys.stdout.write(text)
     sys.stdout.flush()
+
 
 def pprint(seq):
     seq = np.array(seq)
@@ -36,6 +38,7 @@ def pprint(seq):
     seq[seq == '1'] = '#'
     seq[seq == '0'] = ' '
     print("\n".join(["".join(x) for x in seq.tolist()]))
+
 
 def gather(m_or_v, idx):
     if len(m_or_v.get_shape()) > 1:
