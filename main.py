@@ -36,8 +36,6 @@ def create_ntm(FLAGS, sess, **ntm_args):
 
 
 def main(_):
-    pp.pprint(flags.FLAGS.__flags)
-
     with tf.device('/cpu:0'), tf.Session() as sess:
         try:
             task = importlib.import_module('tasks.%s' % FLAGS.task)
@@ -47,6 +45,8 @@ def main(_):
 
         if hasattr(task, 'preset_flags'):
             task.preset_flags(FLAGS)
+
+        pp.pprint(flags.FLAGS.__flags)
 
         if FLAGS.is_train:
             cell, ntm = create_ntm(FLAGS, sess)
@@ -71,7 +71,7 @@ def main(_):
                 seq_in, seq_out, outputs, rounded_outputs, read_ws, write_ws, loss = task.run(ntm, FLAGS.test_max_length, sess, idx=idx, print_=True)
                 count += 1
                 # if (seq_out[0] == rounded_outputs[0]).sum() == FLAGS.output_dim:
-                if task.seq_to_inst(seq_out) == task.seq_to_inst(rounded_outputs):
+                if task.seq_to_inst(seq_out, seq_out) == task.seq_to_inst(rounded_outputs, outputs):
                     correct += 1
             print('correct: %d / count: %d' % (correct, count))
         else:

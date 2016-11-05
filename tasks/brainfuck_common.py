@@ -75,16 +75,19 @@ def meta_run(ntm, seq_length, sess, generate_training_sequence, idx=None, seq_to
     rounded_outputs = np.round(outputs)
     if print_:
         np.set_printoptions(suppress=True)
-        correct = (seq_out[0] == rounded_outputs[0]).sum() == seq_out[0].size
+        correct = seq_to_inst(seq_out, seq_out) == seq_to_inst(rounded_outputs, outputs)
         if not correct:
             print(" -- %s" % ('CORRECT' if correct else 'incorrect'))
             print(" input : ")
             print(context)
             print(" true output : ")
             print(instruction)
-            print(seq_to_inst(seq_out))
+            print(seq_to_inst(seq_out, seq_out))
+            print(seq_out)
             print(" predicted output :")
-            print(seq_to_inst(rounded_outputs))
+            print(seq_to_inst(rounded_outputs, outputs))
+            print(rounded_outputs)
+            print(outputs)
             print(" Loss : %f" % loss)
         np.set_printoptions(suppress=False)
     return seq_in, seq_out, outputs, rounded_outputs, read_ws, write_ws, loss
