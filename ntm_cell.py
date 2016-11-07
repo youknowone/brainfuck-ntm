@@ -59,7 +59,7 @@ class NTMCell(object):
             - A 2D, batch x state_size, Tensor representing the new state of LSTM
                 after reading "input_" when previous state was "state".
         """
-        if state == None:
+        if state is None:
             _, state = self.initial_state()
 
         M_prev = state['M']

@@ -22,8 +22,8 @@ def run(ntm, seq_length, sess, idx=None, print_=True):
     return common.meta_run(ntm, seq_length, sess, generate_training_sequence=generate_training_sequence, idx=idx, seq_to_inst=seq_to_inst, print_=print_)
 
 
-def train(ntm, config, sess):
-    return common.meta_train(ntm, config, sess, generate_training_sequence=generate_training_sequence)
+def train(ntm, config, sess, **kw):
+    return common.meta_train(ntm, config, sess, generate_training_sequence=generate_training_sequence, **kw)
 
 
 tf_set = [False, True]

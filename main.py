@@ -14,11 +14,13 @@ flags.DEFINE_integer("output_dim", 10, "Dimension of output [10]")
 flags.DEFINE_integer("min_length", 1, "Minimum length of input sequence [1]")
 flags.DEFINE_integer("max_length", 10, "Maximum length of output sequence [10]")
 flags.DEFINE_integer("controller_layer_size", 1, "The size of LSTM controller [1]")
+flags.DEFINE_integer("controller_dim", 100, "The dimension of LSTM controller [100]")
 flags.DEFINE_integer("write_head_size", 1, "The number of write head [1]")
 flags.DEFINE_integer("read_head_size", 1, "The number of read head [1]")
 flags.DEFINE_integer("test_max_length", 120, "Maximum length of output sequence [120]")
 flags.DEFINE_string("checkpoint_dir", "checkpoint", "Directory name to save the checkpoints [checkpoint]")
 flags.DEFINE_boolean("is_train", False, "True for training, False for testing [False]")
+flags.DEFINE_boolean("continue_train", None, "True to continue training from saved checkpoint. False for restarting. None for automatic [False]")
 FLAGS = flags.FLAGS
 
 
@@ -27,11 +29,13 @@ def create_ntm(FLAGS, sess, **ntm_args):
         input_dim=FLAGS.input_dim,
         output_dim=FLAGS.output_dim,
         controller_layer_size=FLAGS.controller_layer_size,
+        controller_dim=FLAGS.controller_dim,
         write_head_size=FLAGS.write_head_size,
         read_head_size=FLAGS.read_head_size)
+    scope = ntm_args.pop('scope', 'NTM-%s' % FLAGS.task)
     ntm = NTM(
         cell, sess, FLAGS.min_length, FLAGS.max_length,
-        test_max_length=FLAGS.test_max_length, **ntm_args)
+        test_max_length=FLAGS.test_max_length, scope=scope, **ntm_args)
     return cell, ntm
 
 

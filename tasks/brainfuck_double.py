@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import numpy as np
 import random
 
-from brainfuck.core import Instruction
+from brainfuck.core import Instruction, State
 
 from . import brainfuck_common as common
 
@@ -11,6 +11,7 @@ print_interval = 5
 
 
 def preset_flags(FLAGS):
+    FLAGS.controller_layer_size = 2
     FLAGS.max_length = 1
     FLAGS.test_max_length = 1
     FLAGS.input_dim = 8 + 1 + 3 + 1 + 2  # 13 + 2 code 8 nonzero 1 skip 3 direction 1
@@ -21,8 +22,8 @@ def run(ntm, seq_length, sess, idx=None, print_=True):
     return common.meta_run(ntm, seq_length, sess, generate_training_sequence=generate_training_sequence, idx=idx, seq_to_inst=seq_to_inst, print_=print_)
 
 
-def train(ntm, config, sess):
-    return common.meta_train(ntm, config, sess, generate_training_sequence=generate_training_sequence)
+def train(ntm, config, sess, **kw):
+    return common.meta_train(ntm, config, sess, generate_training_sequence=generate_training_sequence, **kw)
 
 
 tf_set = [False, True]
@@ -31,8 +32,9 @@ order = '><+-.,[]'
 
 def generate_training_sequence(length, config, idx=None):
     if not idx:
-        idx = random.randint(0, 2 ** 30)
-    context, instruction = common.context_products[idx % len(common.context_products)]
+        context, instruction = random.choice(common.context_products)
+    else:
+        context, instruction = common.context_products[idx % len(common.context_products)]
 
     token = context[0]
     if token is None:
@@ -79,8 +81,9 @@ def generate_training_sequence(length, config, idx=None):
     return (token, nonzero, skip, direction), instruction, list(seq_in), list(seq_out)
 
 
-def seq_to_inst(seq):
+def seq_to_inst(seq, outputs):
     bits = seq[0]
+    values = outputs[0]
 
     def get_diff(base):
         diff = sorted([

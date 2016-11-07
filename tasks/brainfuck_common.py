@@ -4,8 +4,8 @@ import os
 import time
 import numpy as np
 import tensorflow as tf
+import random
 import itertools
-from random import randint
 
 from ntm import NTM
 from ntm_cell import NTMCell
@@ -109,10 +109,18 @@ def meta_train(ntm, config, sess, generate_training_sequence, **ntm_args):
     tf.initialize_all_variables().run()
     print(" [*] Initialization finished")
 
+    if config.continue_train is not False:
+        ntm.load(config.checkpoint_dir, config.task, strict=config.continue_train is True)
+
+    rerun_queue = []
     start_time = time.time()
     for idx in xrange(config.epoch):
-        seq_length = randint(config.min_length, config.max_length)
-        context, instruction, seq_in, seq_out = generate_training_sequence(seq_length, config)
+        seq_length = random.randint(config.min_length, config.max_length)
+        if rerun_queue and random.random() < 0.7:
+            qidx = random.randint(0, len(rerun_queue) - 1)
+            context, instruction, seq_in, seq_out = rerun_queue.pop(qidx)
+        else:
+            context, instruction, seq_in, seq_out = generate_training_sequence(seq_length, config)
 
         input_dict = {input_: vec for vec, input_ in zip(seq_in, ntm.inputs)}
         output_dict = {true_output: vec for vec, true_output in zip(seq_out, ntm.true_outputs)}
@@ -127,6 +135,18 @@ def meta_train(ntm, config, sess, generate_training_sequence, **ntm_args):
         _, cost, step = sess.run([ntm.optims[seq_length],
                                   ntm.get_loss(seq_length),
                                   ntm.global_step], feed_dict=feed_dict)
+
+        input_states = [state['write_w'][0] for state in ntm.input_states[seq_length]]
+        output_states = [state['read_w'][0] for state in ntm.get_output_states(seq_length)]
+        result = sess.run(ntm.get_outputs(seq_length) +
+                          input_states + output_states +
+                          [ntm.get_loss(seq_length)],
+                          feed_dict=feed_dict)
+        outputs = result[:seq_length]
+        rounded_outputs = np.round(outputs)
+
+        if (seq_out[0] == rounded_outputs[0]).sum() < rounded_outputs.size:
+            rerun_queue.append((context, instruction, seq_in, seq_out))
 
         if idx % 100 == 0:
             ntm.save(config.checkpoint_dir, config.task, step)

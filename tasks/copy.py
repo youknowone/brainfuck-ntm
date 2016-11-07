@@ -4,9 +4,7 @@ import numpy as np
 import tensorflow as tf
 from random import randint
 
-from ntm import NTM
 from utils import pprint
-from ntm_cell import NTMCell
 
 print_interval = 5
 
@@ -70,8 +68,12 @@ def train(ntm, config, sess):
     tf.initialize_all_variables().run()
     print(" [*] Initialization finished")
 
+    if config.continue_train is not False:
+        ntm.load(config.checkpoint_dir, config.task, strict=config.continue_train is True)
+
+    step = sess.run(ntm.global_step)
     start_time = time.time()
-    for idx in xrange(config.epoch):
+    for idx in xrange(step, step + config.epoch):
         seq_length = randint(config.min_length, config.max_length)
         seq = generate_copy_sequence(seq_length, config.input_dim - 2)
 
@@ -89,12 +91,13 @@ def train(ntm, config, sess):
                                   ntm.global_step], feed_dict=feed_dict)
 
         if idx % 100 == 0:
-            ntm.save(config.checkpoint_dir, 'copy', step)
+            ntm.save(config.checkpoint_dir, config.task, step)
 
         if idx % print_interval == 0:
-            print("[%5d] %2d: %.2f (%.1fs)" \
-                % (idx, seq_length, cost, time.time() - start_time))
+            print("[%5d] %2d: %.2f (%.1fs)"
+                  % (step, seq_length, cost, time.time() - start_time))
 
+    ntm.save(config.checkpoint_dir, config.task, step)
     print("Training Copy task finished")
 
 

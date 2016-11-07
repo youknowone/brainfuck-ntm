@@ -76,7 +76,9 @@ class NTM(object):
         self.saver = None
         self.params = None
 
-        self.global_step = tf.Variable(0, trainable=False)
+        with tf.variable_scope(self.scope):
+            self.global_step = tf.Variable(0, trainable=False)
+
         self.opt = tf.train.RMSPropOptimizer(self.lr,
                                              decay=self.decay,
                                              momentum=self.momentum)
@@ -164,7 +166,9 @@ class NTM(object):
                                                   zip(grads, self.params),
                                                   global_step=self.global_step)
 
-        self.saver = tf.train.Saver()
+        model_vars = [v for v in tf.all_variables() if v.name.startswith(self.scope)]
+        # print([v.name for v in model_vars])
+        self.saver = tf.train.Saver(model_vars)
         print(" [*] Build a NTM model finished")
 
     def get_outputs(self, seq_length):
@@ -239,7 +243,7 @@ class NTM(object):
 
     def save(self, checkpoint_dir, task_name, step):
         task_dir = os.path.join(checkpoint_dir, "%s_%s" % (task_name, self.max_length))
-        file_name = "NTM_%s.model" % task_name
+        file_name = "%s_%s.model" % (self.scope, task_name)
 
         if not os.path.exists(task_dir):
             os.makedirs(task_dir)
@@ -248,7 +252,7 @@ class NTM(object):
                        os.path.join(task_dir, file_name),
                        global_step = step.astype(int))
 
-    def load(self, checkpoint_dir, task_name):
+    def load(self, checkpoint_dir, task_name, strict=True):
         print(" [*] Reading checkpoints...")
 
         task_dir = "%s_%s" % (task_name, self.max_length)
@@ -257,6 +261,10 @@ class NTM(object):
         ckpt = tf.train.get_checkpoint_state(checkpoint_dir)
         if ckpt and ckpt.model_checkpoint_path:
             ckpt_name = os.path.basename(ckpt.model_checkpoint_path)
-            self.saver.restore(self.sess, os.path.join(checkpoint_dir, ckpt_name))
+            ckpt_path = os.path.join(checkpoint_dir, ckpt_name)
+            self.saver.restore(self.sess, ckpt_path)
         else:
-            raise Exception(" [!] Testing, but %s not found" % checkpoint_dir)
+            if strict:
+                raise Exception(" [!] Testing, but %s not found" % checkpoint_dir)
+            else:
+                print(' [!] Training, but previous training data %s not found' % checkpoint_dir)
