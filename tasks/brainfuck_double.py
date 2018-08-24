@@ -30,6 +30,14 @@ tf_set = [False, True]
 order = '><+-.,[]'
 
 
+pool = [
+    (',', True, 0, 1),
+    (',', False, 0, 1),
+    ('.', True, 0, 1),
+    ('.', False, 0, 1),
+]
+
+
 def generate_training_sequence(length, config, idx=None):
     if not idx:
         context, instruction = random.choice(common.context_products)

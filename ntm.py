@@ -20,7 +20,7 @@ class NTM(object):
                  min_length, max_length,
                  test_max_length=120,
                  min_grad=-10, max_grad=+10,
-                 lr=1e-4, momentum=0.9, decay=0.95,
+                 lr=5e-4, momentum=0.7, decay=0.95,
                  scope="NTM", forward_only=False, is_copy=True):
         """Create a neural turing machine specified by NTMCell "cell".
 

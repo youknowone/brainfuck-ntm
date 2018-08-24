@@ -24,6 +24,23 @@ for context in itertools.product('+-><[],.', [True, False], [0, 1, 2], [1, -1]):
         print('unacceptable context:', context)
     else:
         context_products.append((context, instruction))
+assert len(context_products) == 80
+
+
+blind_contexts = [
+    (',', False, 0, 1),
+    ('+', False, 0, 1),
+    ('>', True, 1, -1),
+    ('-', False, 1, -1),
+    ('<', True, 2, 1),
+    ('.', False, 1, 1),
+    ('+', True, 1, -1),
+    ('-', True, 2, 1),
+]
+
+blinded_context_products = [
+    (c, i) for (c, i) in context_products if c not in blind_contexts]
+assert len(blinded_context_products) == 72
 
 
 def create_ntm(FLAGS, sess, forward_only, **ntm_args):
@@ -78,6 +95,7 @@ def meta_run(ntm, seq_length, sess, generate_training_sequence, idx=None, seq_to
         correct = seq_to_inst(seq_out, seq_out) == seq_to_inst(rounded_outputs, outputs)
         if not correct:
             print(" -- %s" % ('CORRECT' if correct else 'incorrect'))
+            print(" is trained:", context not in blind_contexts)
             print(" input : ")
             print(context)
             print(" true output : ")
@@ -116,7 +134,7 @@ def meta_train(ntm, config, sess, generate_training_sequence, **ntm_args):
     start_time = time.time()
     for idx in xrange(config.epoch):
         seq_length = random.randint(config.min_length, config.max_length)
-        if rerun_queue and random.random() < 0.7:
+        if rerun_queue and random.random() < 0.85:
             qidx = random.randint(0, len(rerun_queue) - 1)
             context, instruction, seq_in, seq_out = rerun_queue.pop(qidx)
         else:

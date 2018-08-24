@@ -1,0 +1,6 @@
+model_checkpoint_path: "NTM-brainfuck_part_direction_brainfuck_part_direction.model-10001"
+all_model_checkpoint_paths: "NTM-brainfuck_part_direction_brainfuck_part_direction.model-9601"
+all_model_checkpoint_paths: "NTM-brainfuck_part_direction_brainfuck_part_direction.model-9701"
+all_model_checkpoint_paths: "NTM-brainfuck_part_direction_brainfuck_part_direction.model-9801"
+all_model_checkpoint_paths: "NTM-brainfuck_part_direction_brainfuck_part_direction.model-9901"
+all_model_checkpoint_paths: "NTM-brainfuck_part_direction_brainfuck_part_direction.model-10001"

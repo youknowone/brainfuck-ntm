@@ -33,7 +33,7 @@ order = '><+-.,[]'
 def generate_training_sequence(length, config, idx=None):
 
     if not idx:
-        context, instruction = random.choice(common.context_products)
+        context, instruction = random.choice(common.blinded_context_products)
     else:
         context, instruction = common.context_products[idx % len(common.context_products)]
 

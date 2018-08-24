@@ -58,12 +58,15 @@ def main(_):
         else:
             cell, ntm = create_ntm(FLAGS, sess, forward_only=True)
 
+        # if FLAGS.task.startswith('brainfuck'):
+        #     FLAGS.checkpoint_name = 'brainfuck'
+
         ntm.load(FLAGS.checkpoint_dir, FLAGS.task)
 
         if FLAGS.task == 'copy':
-            task.run(ntm, FLAGS.test_max_length * 1 / 3, sess)
-            print
-            task.run(ntm, FLAGS.test_max_length * 2 / 3, sess)
+            #task.run(ntm, FLAGS.test_max_length * 1 / 3, sess)
+            #print
+            #task.run(ntm, FLAGS.test_max_length * 2 / 3, sess)
             print
             task.run(ntm, FLAGS.test_max_length * 3 / 3, sess)
         elif FLAGS.task.startswith('brainfuck'):

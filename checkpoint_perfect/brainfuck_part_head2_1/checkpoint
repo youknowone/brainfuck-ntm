@@ -1,0 +1,6 @@
+model_checkpoint_path: "NTM-brainfuck_part_head2_brainfuck_part_head2.model-2501"
+all_model_checkpoint_paths: "NTM-brainfuck_part_head2_brainfuck_part_head2.model-2101"
+all_model_checkpoint_paths: "NTM-brainfuck_part_head2_brainfuck_part_head2.model-2201"
+all_model_checkpoint_paths: "NTM-brainfuck_part_head2_brainfuck_part_head2.model-2301"
+all_model_checkpoint_paths: "NTM-brainfuck_part_head2_brainfuck_part_head2.model-2401"
+all_model_checkpoint_paths: "NTM-brainfuck_part_head2_brainfuck_part_head2.model-2501"
